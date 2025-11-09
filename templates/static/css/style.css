@@ -1,0 +1,30 @@
+/* Paleta “azul doctor” */
+:root{
+  --clinic-bg: #f4f8ff;
+  --clinic-primary: #1e6fd9;   /* azul médico */
+  --clinic-primary-100: #e7f0ff;
+}
+
+.bg-primary { background-color: var(--clinic-primary) !important; }
+.btn-primary,
+.btn-outline-primary:hover { background-color: var(--clinic-primary); border-color: var(--clinic-primary); }
+.btn-outline-primary { color: var(--clinic-primary); border-color: var(--clinic-primary); }
+
+.bg-clinic { background: linear-gradient(180deg, var(--clinic-bg), #ffffff 60%); }
+
+/* Tarjetas de acciones */
+.action-card{ border-radius: 1rem; }
+.action-card .card-title{ color:#0f3f89; }
+
+/* Avatar simple */
+.avatar-circle{
+  width: 56px; height:56px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size: 28px;
+}
+
+/* Tarjeta */
+.card{ border-radius: 1rem; }
+
+/* Links del navbar */
+.navbar .navbar-brand{ letter-spacing:.3px; }

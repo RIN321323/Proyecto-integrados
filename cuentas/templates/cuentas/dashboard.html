@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Obstetricia{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12">
+    <div class="d-flex align-items-center gap-3">
+      <div class="avatar-circle bg-primary text-white"></div>
+      <div>
+        <h4 class="mb-0">Bienvenido(a), {{ request.user.first_name|default:request.user.username }}</h4>
+        <small class="text-muted">Rol: {{ request.user.perfil.rol|default:"Matrona" }}</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+          <h6 class="mb-1">Total partos (mes)</h6>
+          <h3 class="mb-0">{{ total_mes|default:0 }}</h3>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+          <h6 class="mb-1">Total partos (30 días)</h6>
+          <h3 class="mb-0">{{ total_30dias|default:0 }}</h3>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+          <h6 class="mb-1">Mis registros recientes</h6>
+          <p class="mb-0">{{ mis_registros.count }} registros</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Registros recientes</h5>
+        <div class="list-group">
+          {% for p in recientes %}
+          <a href="{% url 'registros:detalle_parto' p.id %}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">{{ p.madre.nombres }} {{ p.madre.apellidos }}</h6>
+              <small>{{ p.fecha_hora|date:"SHORT_DATETIME_FORMAT" }}</small>
+            </div>
+            <p class="mb-1 text-muted">Registrado por: {{ p.created_by.get_full_name|default:p.created_by.username }}</p>
+          </a>
+          {% empty %}
+          <div class="text-muted p-3">No hay registros recientes.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card action-card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Registrar/Completar Parto</h5>
+        <p class="card-text text-muted">Formulario para madre, parto y recién nacido.</p>
+  <a href="{% url 'registros:registro_parto' %}" class="btn btn-outline-primary">Abrir formulario</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card action-card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Consultar Registros</h5>
+        <p class="card-text text-muted">Búsqueda y listado de atenciones.</p>
+  <a href="{% url 'registros:lista_partos' %}" class="btn btn-outline-primary">Consultar</a>
+      </div>
+    </div>
+  </div>
+
+  {% if request.user.perfil.rol == 'administrador' %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card action-card h-100 shadow-sm border-primary-subtle">
+      <div class="card-body">
+        <h5 class="card-title">Gestión de Usuarios</h5>
+        <p class="card-text text-muted">Crear, editar y desactivar cuentas.</p>
+        <a href="{% url 'cuentas:gestionar_usuarios' %}" class="btn btn-primary">Administrar</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Detalle de Parto · Obstetricia{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>{{ titulo }}</h3>
+  <div>
+    <a href="{% url 'registros:editar_parto' parto.id %}" class="btn btn-secondary">Editar</a>
+    <a href="{% url 'registros:lista_partos' %}" class="btn btn-outline-primary">Volver a la lista</a>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">Datos de la madre</div>
+  <div class="card-body">
+    <p><strong>RUT:</strong> {{ parto.madre.rut }}</p>
+    <p><strong>Nombre:</strong> {{ parto.madre.nombres }} {{ parto.madre.apellidos }}</p>
+    <p><strong>Edad:</strong> {{ parto.madre.edad }} años</p>
+    <p><strong>Dirección:</strong> {{ parto.madre.direccion }}</p>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">Datos del parto</div>
+  <div class="card-body">
+    <p><strong>Fecha y hora:</strong> {{ parto.fecha_hora|date:"SHORT_DATETIME_FORMAT" }}</p>
+    <p><strong>Tipo:</strong> {{ parto.tipo_parto }}</p>
+    <p><strong>Observaciones:</strong> {{ parto.observaciones|default:"-" }}</p>
+    <p><strong>Registrado por:</strong> {{ parto.created_by.get_full_name|default:parto.created_by.username }}</p>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">Recién nacido(s)</div>
+  <div class="card-body">
+    {% if parto.recien_nacidos.all %}
+      <ul class="list-group">
+        {% for rn in parto.recien_nacidos.all %}
+        <li class="list-group-item">
+          <strong>Nombre:</strong> {{ rn.nombres }} {{ rn.apellidos }} — <strong>Peso:</strong> {{ rn.peso }} g — <strong>Sexo:</strong> {{ rn.sexo }}
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">No hay datos de recién nacidos.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

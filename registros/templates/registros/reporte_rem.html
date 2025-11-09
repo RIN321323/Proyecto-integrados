@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Reportes REM{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Reportes REM</h2>
+            </div>
+
+            <!-- Formulario de generación de reportes -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-md-4">
+                            <label class="form-label">Tipo de Reporte</label>
+                            <select name="tipo_reporte" class="form-select" required>
+                                <option value="bs22">REM-BS22 (Atenciones de Obstetricia)</option>
+                                <option value="a09">REM-A09 (Egresos)</option>
+                                <option value="a04">REM-A04 (Defunciones)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Fecha Inicio</label>
+                            <input type="date" name="fecha_inicio" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Fecha Fin</label>
+                            <input type="date" name="fecha_fin" class="form-control" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Formato</label>
+                            <select name="formato" class="form-select" required>
+                                <option value="web">Ver en línea</option>
+                                <option value="excel">Exportar a Excel</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Generar Reporte</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if datos %}
+            <!-- Visualización del reporte -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {% if tipo_reporte == 'bs22' %}
+                        <h4 class="card-title mb-4">REM-BS22: Atenciones de Obstetricia y Ginecología</h4>
+                        
+                        <!-- Total de Partos -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Total de Partos</h6>
+                                        <h3 class="card-title mb-0">{{ datos.total_partos }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Partos por Tipo -->
+                        <h5 class="mb-3">Partos por Tipo</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Vaginales</h6>
+                                        <h4 class="card-title mb-0">{{ datos.partos_por_tipo.vaginal }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Cesáreas</h6>
+                                        <h4 class="card-title mb-0">{{ datos.partos_por_tipo.cesarea }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Fórceps</h6>
+                                        <h4 class="card-title mb-0">{{ datos.partos_por_tipo.forceps }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Partos por Edad -->
+                        <h5 class="mb-3">Partos por Edad de la Madre</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Menor de 15</th>
+                                        <th>15-19</th>
+                                        <th>20-24</th>
+                                        <th>25-29</th>
+                                        <th>30-34</th>
+                                        <th>35 y más</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ datos.partos_por_edad.menor_15 }}</td>
+                                        <td>{{ datos.partos_por_edad.15_19 }}</td>
+                                        <td>{{ datos.partos_por_edad.20_24 }}</td>
+                                        <td>{{ datos.partos_por_edad.25_29 }}</td>
+                                        <td>{{ datos.partos_por_edad.30_34 }}</td>
+                                        <td>{{ datos.partos_por_edad.35_mas }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Tipo de Anestesia -->
+                        <h5 class="mb-3">Tipo de Anestesia</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ninguna</th>
+                                        <th>Local</th>
+                                        <th>Epidural</th>
+                                        <th>Raquídea</th>
+                                        <th>General</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ datos.anestesia.ninguna }}</td>
+                                        <td>{{ datos.anestesia.local }}</td>
+                                        <td>{{ datos.anestesia.epidural }}</td>
+                                        <td>{{ datos.anestesia.raquidea }}</td>
+                                        <td>{{ datos.anestesia.general }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    {% if tipo_reporte == 'a09' %}
+                        <h4 class="card-title mb-4">REM-A09: Egresos Hospitalarios</h4>
+                        <!-- Implementar visualización de REM-A09 -->
+                    {% endif %}
+
+                    {% if tipo_reporte == 'a04' %}
+                        <h4 class="card-title mb-4">REM-A04: Defunciones</h4>
+                        <!-- Implementar visualización de REM-A04 -->
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Establecer fecha fin por defecto como hoy
+    var today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="fecha_fin"]').value = today;
+    
+    // Establecer fecha inicio por defecto como primer día del mes
+    var firstDay = new Date();
+    firstDay.setDate(1);
+    document.querySelector('input[name="fecha_inicio"]').value = firstDay.toISOString().split('T')[0];
+});
+</script>
+{% endblock %}

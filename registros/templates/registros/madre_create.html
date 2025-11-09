@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2>{{ titulo }}</h2>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        
+        {% if madre_create_form.non_field_errors %}
+          <div class="alert alert-danger">
+            {{ madre_create_form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            {{ madre_create_form.rut.label_tag }}
+            {{ madre_create_form.rut }}
+            {% if madre_create_form.rut.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in madre_create_form.rut.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            {{ madre_create_form.nombres.label_tag }}
+            {{ madre_create_form.nombres }}
+            {% if madre_create_form.nombres.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in madre_create_form.nombres.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            {{ madre_create_form.apellidos.label_tag }}
+            {{ madre_create_form.apellidos }}
+            {% if madre_create_form.apellidos.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in madre_create_form.apellidos.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            {{ madre_create_form.fecha_nacimiento.label_tag }}
+            {{ madre_create_form.fecha_nacimiento }}
+            {% if madre_create_form.fecha_nacimiento.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in madre_create_form.fecha_nacimiento.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            {{ madre_create_form.estado_civil.label_tag }}
+            {{ madre_create_form.estado_civil }}
+            {% if madre_create_form.estado_civil.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in madre_create_form.estado_civil.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            {{ madre_create_form.prevision.label_tag }}
+            {{ madre_create_form.prevision }}
+            {% if madre_create_form.prevision.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in madre_create_form.prevision.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-8">
+            {{ madre_create_form.direccion.label_tag }}
+            {{ madre_create_form.direccion }}
+            {% if madre_create_form.direccion.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in madre_create_form.direccion.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            {{ madre_create_form.telefono.label_tag }}
+            {{ madre_create_form.telefono }}
+            {% if madre_create_form.telefono.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in madre_create_form.telefono.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+          <a href="{% url 'registros:registro_parto' %}" class="btn btn-secondary">Volver al Registro</a>
+          <button type="submit" class="btn btn-primary">Crear Madre</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

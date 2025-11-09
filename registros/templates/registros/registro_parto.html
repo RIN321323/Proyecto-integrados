@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2 class="mb-3">{{ titulo }}</h2>
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Hidden names for JS -->
+                <input type="hidden" id="hidden_madre_rut_name" value="{{ form.madre_form.rut.html_name }}">
+                <input type="hidden" id="hidden_madre_nombres_name" value="{{ form.madre_form.nombres.html_name }}">
+                <input type="hidden" id="hidden_madre_apellidos_name" value="{{ form.madre_form.apellidos.html_name }}">
+                <input type="hidden" id="hidden_madre_fecha_nacimiento_name" value="{{ form.madre_form.fecha_nacimiento.html_name }}">
+                <input type="hidden" id="hidden_madre_estado_civil_name" value="{{ form.madre_form.estado_civil.html_name }}">
+                <input type="hidden" id="hidden_madre_direccion_name" value="{{ form.madre_form.direccion.html_name }}">
+                <input type="hidden" id="hidden_madre_telefono_name" value="{{ form.madre_form.telefono.html_name }}">
+                <input type="hidden" id="hidden_madre_prevision_name" value="{{ form.madre_form.prevision.html_name }}">
+                <input type="hidden" id="hidden_madre_lookup_url" value="{% url 'registros:madre_lookup' %}">
+                <input type="hidden" id="hidden_madre_typeahead_url" value="{% url 'registros:madre_typeahead' %}">
+                <input type="hidden" id="hidden_madre_create_url" value="{% url 'registros:madre_create' %}">
+                
+                {% if form.madre_form.non_field_errors or form.madre_form.errors %}
+                    <div class="alert alert-danger">
+                        {% for e in form.madre_form.non_field_errors %}
+                            <div>{{ e }}</div>
+                        {% endfor %}
+                        {% with mf=form.madre_form %}
+                            {% for field_name, errs in mf.errors.items %}
+                                {% for err in errs %}
+                                    {# find the BoundField with matching name to get its label #}
+                                    {% for bf in mf %}
+                                        {% if bf.name == field_name %}
+                                            <div><strong>{{ bf.label }}:</strong> {{ err }}</div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endfor %}
+                        {% endwith %}
+                    </div>
+                {% endif %}
+                
+                <!-- Datos de la Madre -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Datos de la Madre</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                {{ form.madre_form.rut.label_tag }}
+                                <div class="input-group">
+                                    {{ form.madre_form.rut }}
+                                    <button type="button" id="btn-buscar-rut" class="btn btn-outline-secondary">Buscar</button>
+                                    <a href="{% url 'registros:madre_create_page' %}" class="btn btn-outline-primary ms-2">Crear madre (página completa)</a>
+                                </div>
+                                <datalist id="madre-suggestions"></datalist>
+                                {% if form.madre_form.rut.errors %}
+                                    <div class="invalid-feedback">{{ form.madre_form.rut.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.madre_form.nombres.label_tag }}
+                                {{ form.madre_form.nombres }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.madre_form.apellidos.label_tag }}
+                                {{ form.madre_form.apellidos }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.madre_form.fecha_nacimiento.label_tag }}
+                                {{ form.madre_form.fecha_nacimiento }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.madre_form.estado_civil.label_tag }}
+                                {{ form.madre_form.estado_civil }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.madre_form.prevision.label_tag }}
+                                {{ form.madre_form.prevision }}
+                            </div>
+                            <div class="col-md-8">
+                                {{ form.madre_form.direccion.label_tag }}
+                                {{ form.madre_form.direccion }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.madre_form.telefono.label_tag }}
+                                {{ form.madre_form.telefono }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datos del Parto -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Datos del Parto</h5>
+                        {% if form.parto_form.non_field_errors or form.parto_form.errors %}
+                            <div class="alert alert-danger">
+                                {% for e in form.parto_form.non_field_errors %}
+                                    <div>{{ e }}</div>
+                                {% endfor %}
+                                {% with pf=form.parto_form %}
+                                    {% for field_name, errs in pf.errors.items %}
+                                        {% for err in errs %}
+                                            {% for bf in pf %}
+                                                {% if bf.name == field_name %}
+                                                    <div><strong>{{ bf.label }}:</strong> {{ err }}</div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                        {% endif %}
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                {{ form.parto_form.fecha_hora.label_tag }}
+                                {{ form.parto_form.fecha_hora }}
+                            </div>
+                            <div class="col-md-4 d-flex align-items-center">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" value="1" id="allow_historico" name="allow_historico">
+                                    <label class="form-check-label" for="allow_historico">
+                                        Registrar como histórico (más de 48h)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.parto_form.tipo_parto.label_tag }}
+                                {{ form.parto_form.tipo_parto }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.parto_form.tipo_anestesia.label_tag }}
+                                {{ form.parto_form.tipo_anestesia }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.parto_form.semanas_gestacion.label_tag }}
+                                {{ form.parto_form.semanas_gestacion }}
+                            </div>
+                            <div class="col-md-12">
+                                {{ form.parto_form.complicaciones.label_tag }}
+                                {{ form.parto_form.complicaciones }}
+                            </div>
+                            <div class="col-md-12">
+                                {{ form.parto_form.observaciones.label_tag }}
+                                {{ form.parto_form.observaciones }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datos del Recién Nacido -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Datos del Recién Nacido</h5>
+                        {% if form.recien_nacido_form.non_field_errors or form.recien_nacido_form.errors %}
+                            <div class="alert alert-danger">
+                                {% for e in form.recien_nacido_form.non_field_errors %}
+                                    <div>{{ e }}</div>
+                                {% endfor %}
+                                {% with rf=form.recien_nacido_form %}
+                                    {% for field_name, errs in rf.errors.items %}
+                                        {% for err in errs %}
+                                            {% for bf in rf %}
+                                                {% if bf.name == field_name %}
+                                                    <div><strong>{{ bf.label }}:</strong> {{ err }}</div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                        {% endif %}
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                {{ form.recien_nacido_form.hora_nacimiento.label_tag }}
+                                {{ form.recien_nacido_form.hora_nacimiento }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.recien_nacido_form.sexo.label_tag }}
+                                {{ form.recien_nacido_form.sexo }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.recien_nacido_form.estado.label_tag }}
+                                {{ form.recien_nacido_form.estado }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.recien_nacido_form.peso.label_tag }}
+                                {{ form.recien_nacido_form.peso }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.recien_nacido_form.talla.label_tag }}
+                                {{ form.recien_nacido_form.talla }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.recien_nacido_form.apgar_1.label_tag }}
+                                {{ form.recien_nacido_form.apgar_1 }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.recien_nacido_form.apgar_5.label_tag }}
+                                {{ form.recien_nacido_form.apgar_5 }}
+                            </div>
+                            <div class="col-md-12">
+                                {{ form.recien_nacido_form.observaciones.label_tag }}
+                                {{ form.recien_nacido_form.observaciones }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'cuentas:dashboard' %}" class="btn btn-light">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Guardar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+// Validación de formulario Bootstrap
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+
+// Formateo automático del RUT
+const rutFieldName = (document.getElementById('hidden_madre_rut_name')||{}).value || '';
+const rutField = rutFieldName ? document.getElementsByName(rutFieldName)[0] : null;
+if (rutField) {
+    rutField.addEventListener('input', function(e) {
+        let rut = e.target.value.replace(/[^0-9kK]/g, '');
+        if (rut.length > 1) rut = rut.slice(0, -1) + '-' + rut.slice(-1);
+        if (rut.length > 4) rut = rut.slice(0, -5) + '.' + rut.slice(-5);
+        if (rut.length > 8) rut = rut.slice(0, -9) + '.' + rut.slice(-9);
+        e.target.value = rut;
+    });
+}
+
+// Poblar madre automáticamente
+function poblarMadre(data){
+    if(!data || !data.found) return;
+    const fieldNames = {
+        'nombres': (document.getElementById('hidden_madre_nombres_name')||{}).value || 'nombres',
+        'apellidos': (document.getElementById('hidden_madre_apellidos_name')||{}).value || 'apellidos',
+        'fecha_nacimiento': (document.getElementById('hidden_madre_fecha_nacimiento_name')||{}).value || 'fecha_nacimiento',
+        'estado_civil': (document.getElementById('hidden_madre_estado_civil_name')||{}).value || 'estado_civil',
+        'direccion': (document.getElementById('hidden_madre_direccion_name')||{}).value || 'direccion',
+        'telefono': (document.getElementById('hidden_madre_telefono_name')||{}).value || 'telefono',
+        'prevision': (document.getElementById('hidden_madre_prevision_name')||{}).value || 'prevision'
+    };
+    for(const key in fieldNames){
+        const els = document.getElementsByName(fieldNames[key]);
+        if(!els || els.length === 0) continue;
+        const el = els[0];
+        if(key === 'fecha_nacimiento') el.value = data[key] ? data[key].slice(0,10) : '';
+        else el.value = data[key] || '';
+    }
+}
+
+// Check for RUT param in URL and lookup if present
+document.addEventListener('DOMContentLoaded', function(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const rutParam = urlParams.get('rut');
+    const madreCreada = urlParams.get('madre_creada');
+    
+    if (rutParam) {
+        const lookupUrl = (document.getElementById('hidden_madre_lookup_url')||{}).value || '';
+        const url = lookupUrl + '?rut=' + encodeURIComponent(rutParam);
+        fetch(url, {credentials: 'same-origin'})
+            .then(r => r.json())
+            .then(data => {
+                if(data.found) {
+                    // Set the RUT field first
+                    const rutField = document.getElementsByName(rutFieldName)[0];
+                    if (rutField) rutField.value = rutParam;
+                    // Then populate the rest
+                    poblarMadre(data);
+                    // If madre was just created, scroll to form and focus the fecha_hora field
+                    if (madreCreada === '1') {
+                        const fechaHoraField = document.getElementsByName('parto-fecha_hora')[0];
+                        if (fechaHoraField) {
+                            fechaHoraField.scrollIntoView({behavior: 'smooth', block: 'center'});
+                            setTimeout(() => fechaHoraField.focus(), 500);
+                        }
+                    }
+                }
+            })
+            .catch(() => console.error('Error al buscar RUT del parámetro URL'));
+    }
+});
+
+// Buscar madre por RUT
+document.getElementById('btn-buscar-rut').addEventListener('click', function(){
+    const rut = rutField ? rutField.value : document.getElementById('id_rut')?.value;
+    if(!rut) return;
+    const lookupUrl = (document.getElementById('hidden_madre_lookup_url')||{}).value || '';
+    const url = lookupUrl + '?rut=' + encodeURIComponent(rut);
+    fetch(url, {credentials: 'same-origin'})
+        .then(r => r.json())
+        .then(data => {
+            if(data.found) poblarMadre(data);
+            else {
+                // Offer to create the madre if not found and prefill the modal with the searched RUT
+                const createNow = confirm('No existe una madre con ese RUT. ¿Desea crearla ahora?');
+                if(createNow){
+                    try{
+                        const modalForm = document.getElementById('form-crear-madre');
+                        if(modalForm){
+                            const rutInputModal = modalForm.querySelector('[name="rut"]');
+                            if(rutInputModal) rutInputModal.value = rut;
+                        }
+                        const modalEl = document.getElementById('modalCrearMadre');
+                        if(modalEl){
+                            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                            modal.show();
+                        }
+                    }catch(e){
+                        // fallback to a simple alert if modal fails
+                        alert('No existe una madre con ese RUT.');
+                    }
+                }
+            }
+        })
+        .catch(() => alert('Error al buscar RUT'));
+});
+
+// Typeahead madre
+let typeaheadTimer = null;
+const inputRut = rutField || document.getElementById('id_rut');
+if (inputRut) {
+    inputRut.setAttribute('list', 'madre-suggestions');
+    inputRut.addEventListener('input', function(){
+        const q = this.value;
+        if(typeaheadTimer) clearTimeout(typeaheadTimer);
+        typeaheadTimer = setTimeout(()=>{
+            if(!q) return;
+            const typeaheadUrl = (document.getElementById('hidden_madre_typeahead_url')||{}).value || '';
+            const url = typeaheadUrl + '?q=' + encodeURIComponent(q);
+            fetch(url, {credentials: 'same-origin'})
+                .then(r=>r.json())
+                .then(resp=>{
+                    const list = document.getElementById('madre-suggestions');
+                    list.innerHTML = '';
+                    resp.results.forEach(item=>{
+                        const option = document.createElement('option');
+                        option.value = item.rut + ' — ' + item.nombres + ' ' + item.apellidos;
+                        list.appendChild(option);
+                    });
+                })
+                .catch(()=>{});
+        }, 250);
+    });
+
+    inputRut.addEventListener('change', function(){
+        const v = this.value || '';
+        if(v.includes(' — ')){
+            const rut = v.split(' — ')[0].trim();
+            this.value = rut;
+            const lookupUrl = (document.getElementById('hidden_madre_lookup_url')||{}).value || '';
+            const url = lookupUrl + '?rut=' + encodeURIComponent(rut);
+            fetch(url, {credentials: 'same-origin'})
+                .then(r => r.json())
+                .then(data => {
+                    if(data.found) poblarMadre(data);
+                    else {
+                        // Offer to create the madre if not found (from datalist selection)
+                        const createNow = confirm('No existe una madre con ese RUT. ¿Desea crearla ahora?');
+                        if(createNow){
+                            try{
+                                const modalForm = document.getElementById('form-crear-madre');
+                                if(modalForm){
+                                    const rutInputModal = modalForm.querySelector('[name="rut"]');
+                                    if(rutInputModal) rutInputModal.value = rut;
+                                }
+                                const modalEl = document.getElementById('modalCrearMadre');
+                                if(modalEl){
+                                    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                                    modal.show();
+                                }
+                            }catch(e){
+                                // ignore and do nothing if modal isn't available
+                            }
+                        }
+                    }
+                })
+                .catch(()=>{});
+        }
+    });
+}
+
+// Scroll al primer error
+function scrollToFirstError(){
+    const formEl = document.querySelector('.needs-validation');
+    if(!formEl) return;
+    let alertEl = formEl.querySelector('.card .alert-danger');
+    if(!alertEl) alertEl = document.querySelector('main .alert-danger');
+    if(alertEl){
+        alertEl.scrollIntoView({behavior:'smooth', block:'center'});
+        const focusable = alertEl.querySelector('input,select,textarea,button');
+        if(focusable) focusable.focus();
+    } else {
+        const invalid = formEl.querySelector(':invalid');
+        if(invalid){
+            invalid.scrollIntoView({behavior:'smooth', block:'center'});
+            invalid.focus();
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(scrollToFirstError, 100);
+});
+</script>
+{% endblock %}
+
+

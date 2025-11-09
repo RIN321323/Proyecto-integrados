@@ -1,0 +1,54 @@
+.bg-clinic {
+    background-color: #f8f9fa;
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar {
+    position: fixed;
+    top: 56px;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.sidebar .nav-link {
+    color: #333;
+    border-radius: 5px;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.action-card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+/* Main content adjustment for sidebar */
+@media (min-width: 992px) {
+    .main-content {
+        margin-left: 250px;
+    }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 991.98px) {
+    .sidebar {
+        position: static;
+        width: 100% !important;
+    }
+}
