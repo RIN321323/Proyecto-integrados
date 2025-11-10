@@ -93,7 +93,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "obstetricia",
         "USER": "root",
-        "PASSWORD": "123456789",
+        "PASSWORD": "12345678",
         "HOST": "localhost",
         "PORT": "3306",
         "OPTIONS": {"charset": "utf8mb4"},

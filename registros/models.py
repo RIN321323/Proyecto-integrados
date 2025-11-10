@@ -63,10 +63,31 @@ class Madre(models.Model):
 
 
         # Validar dígito verificador del RUT
-        rut_limpio = self.rut.replace('.', '').replace('-', '')
-        dv = rut_limpio[-1].upper()
-        rut_numero = int(rut_limpio[:-1])
-        
+        # Primero validar que el RUT no esté vacío
+        if not self.rut or not self.rut.strip():
+            raise ValidationError('El RUT es requerido.')
+
+        rut_limpio = self.rut.replace('.', '').replace('-', '').strip()
+
+        # Validar que el RUT tenga contenido después de limpiar
+        if not rut_limpio or len(rut_limpio) < 2:
+            raise ValidationError('El RUT ingresado no es válido. Debe tener el formato: 12345678-9')
+
+        # Extraer dígito verificador y número de forma segura
+        try:
+            dv = rut_limpio[-1].upper()
+            rut_numero = int(rut_limpio[:-1])
+        except (IndexError, ValueError):
+            raise ValidationError('El RUT contiene caracteres inválidos. Use el formato: 12345678-9')
+
+        # Validar que el dígito verificador sea válido (0-9 o K)
+        if dv not in '0123456789K':
+            raise ValidationError('El dígito verificador debe ser un número (0-9) o la letra K.')
+
+        # Validar que el número del RUT sea válido
+        if rut_numero <= 0:
+            raise ValidationError('El RUT debe ser un número válido mayor a 0.')
+
         calculated_dv = self.calcular_dv(rut_numero)
         if dv != calculated_dv:
             raise ValidationError('El RUT ingresado no es válido.')
@@ -204,8 +225,7 @@ class RecienNacido(models.Model):
     )
     talla = models.DecimalField(
         max_digits=4,
-        decimal_places=1,
-        validators=[MinValueValidator(20), MaxValueValidator(60)]
+        decimal_places=1
     )
     apgar_1 = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(10)]
@@ -294,13 +314,6 @@ class RecienNacido(models.Model):
                     raise ValidationError(f'El peso no puede ser menor a {peso_min}kg.')
                 if self.peso > 4.0:  # 4000g
                     raise ValidationError('El peso es muy alto para un bebé pretérmino.')
-
-        # Validar talla
-        if self.talla:
-            if self.talla < 25:  # 25cm
-                raise ValidationError('La talla es muy baja, por favor verificar.')
-            if self.talla > 60:  # 60cm
-                raise ValidationError('La talla es muy alta, por favor verificar.')
 
         # Validar APGAR
         if self.apgar_1 is not None and self.apgar_5 is not None:

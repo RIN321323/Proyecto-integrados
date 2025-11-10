@@ -10,6 +10,8 @@ class Rol(models.Model):
 class Usuario(AbstractUser):
     # username, password, first_name, last_name, email, is_active... ya vienen
     rol = models.ForeignKey(Rol, null=True, blank=True, on_delete=models.SET_NULL)
+    run = models.CharField(max_length=12, unique=True, null=True, blank=True, help_text="RUN sin puntos, con guión y dígito verificador")
+    telefono = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:
         db_table = "usuario"  # si quieres que la tabla se llame 'usuario'

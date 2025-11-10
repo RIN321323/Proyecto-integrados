@@ -3,7 +3,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
-from .forms import LoginForm
+from django.contrib import messages
+from .forms import LoginForm, ProfesionalRegistroForm
+from .models import Usuario, Rol
 from registros.models import Parto
 from django.utils import timezone
 
@@ -31,9 +33,9 @@ def dashboard(request):
     total_mes = Parto.objects.filter(fecha_hora__date__gte=inicio_mes.date()).count()
     total_30dias = Parto.objects.filter(fecha_hora__gte=now - timezone.timedelta(days=30)).count()
     # Últimos 5 registros (global)
-    recientes = Parto.objects.select_related('madre').order_by('-fecha_hora')[:5]
+    recientes = Parto.objects.select_related('madre', 'created_by').order_by('-fecha_hora')[:5]
     # Mis registros
-    mis_registros = Parto.objects.filter(created_by=request.user).order_by('-fecha_hora')[:5]
+    mis_registros = Parto.objects.filter(created_by=request.user).select_related('madre').order_by('-fecha_hora')[:5]
 
     return render(request, "cuentas/dashboard.html", {
         'total_mes': total_mes,
@@ -71,3 +73,49 @@ def completar_formulario_parto(request):
     # Esto permite centralizar la lógica de creación/edición en esa app.
     from django.shortcuts import redirect
     return redirect('registros:registro_parto')
+
+def registro_profesional(request):
+    """Vista para registro de profesionales de la salud"""
+    if request.user.is_authenticated:
+        return redirect("cuentas:dashboard")
+    
+    form = ProfesionalRegistroForm(request.POST or None)
+    
+    if request.method == "POST" and form.is_valid():
+        # Obtener o crear el rol según el área seleccionada
+        area = form.cleaned_data['area']
+        rol, created = Rol.objects.get_or_create(nombre=area)
+        
+        # Crear el username basado en el RUN (sin guión)
+        run = form.cleaned_data['run']
+        username = run.replace('-', '').replace('.', '')
+        
+        # Verificar que el username no exista
+        if Usuario.objects.filter(username=username).exists():
+            form.add_error('run', 'Ya existe un usuario con este RUN')
+            return render(request, "cuentas/registro_profesional.html", {"form": form})
+        
+        # Crear el usuario
+        try:
+            usuario = Usuario.objects.create_user(
+                username=username,
+                password=form.cleaned_data['password'],
+                first_name=form.cleaned_data['nombre'],
+                last_name=form.cleaned_data['apellido'],
+                run=run,
+                telefono=form.cleaned_data['telefono'],
+                rol=rol,
+                is_active=True
+            )
+            
+            # Autenticar y hacer login automático
+            user = authenticate(request, username=username, password=form.cleaned_data['password'])
+            if user:
+                login(request, user)
+                messages.success(request, f'¡Bienvenido/a {usuario.get_full_name()}! Tu cuenta ha sido creada exitosamente.')
+                return redirect("cuentas:dashboard")
+        except Exception as e:
+            form.add_error(None, f'Error al crear la cuenta: {str(e)}')
+            return render(request, "cuentas/registro_profesional.html", {"form": form})
+    
+    return render(request, "cuentas/registro_profesional.html", {"form": form})

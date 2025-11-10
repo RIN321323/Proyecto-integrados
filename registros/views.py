@@ -340,20 +340,20 @@ def madre_create(request):
 @login_required
 def exportar_partos(request):
     """Exportar partos a Excel dentro de un rango de fechas (GET start/end en formato YYYY-MM-DD).
-    Si no se proveen fechas, por defecto exporta los últimos 30 días.
+    Si no se proveen fechas, exporta TODOS los partos disponibles.
     """
     start = request.GET.get('start')
     end = request.GET.get('end')
-    try:
-        if start:
+    
+    # Si no se proporcionan fechas, exportar todos los partos (pasar None)
+    if not start or not end:
+        fecha_inicio = None
+        fecha_fin = None
+    else:
+        try:
             fecha_inicio = datetime.fromisoformat(start).date()
-        else:
-            fecha_inicio = (datetime.now() - timedelta(days=30)).date()
-        if end:
             fecha_fin = datetime.fromisoformat(end).date()
-        else:
-            fecha_fin = datetime.now().date()
-    except ValueError:
-        return HttpResponse('Formato de fecha inválido. Use YYYY-MM-DD', status=400)
+        except ValueError:
+            return HttpResponse('Formato de fecha inválido. Use YYYY-MM-DD', status=400)
 
     return exportar_datos_excel(fecha_inicio, fecha_fin)

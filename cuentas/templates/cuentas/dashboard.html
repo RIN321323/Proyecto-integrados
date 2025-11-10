@@ -8,7 +8,7 @@
       <div class="avatar-circle bg-primary text-white"></div>
       <div>
         <h4 class="mb-0">Bienvenido(a), {{ request.user.first_name|default:request.user.username }}</h4>
-        <small class="text-muted">Rol: {{ request.user.perfil.rol|default:"Matrona" }}</small>
+        <small class="text-muted">Rol: {{ request.user.perfil.rol|default:"Admin" }}</small>
       </div>
     </div>
   </div>
@@ -47,7 +47,14 @@
               <h6 class="mb-1">{{ p.madre.nombres }} {{ p.madre.apellidos }}</h6>
               <small>{{ p.fecha_hora|date:"SHORT_DATETIME_FORMAT" }}</small>
             </div>
-            <p class="mb-1 text-muted">Registrado por: {{ p.created_by.get_full_name|default:p.created_by.username }}</p>
+            <p class="mb-1 text-muted">
+              Registrado por: 
+              {% if p.created_by %}
+                {{ p.created_by.get_full_name|default:p.created_by.username }}
+              {% else %}
+                Sistema
+              {% endif %}
+            </p>
           </a>
           {% empty %}
           <div class="text-muted p-3">No hay registros recientes.</div>
